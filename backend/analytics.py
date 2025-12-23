@@ -238,53 +238,48 @@ def get_dashboard_stats():
 
 @app.get("/analytics/funnel")
 def get_funnel_data():
-    """
-    Calculate application funnel stages: applied → phone_screen → interview → offer
-    Returns counts and percentages for each stage
-    """
+    """Calculate application funnel stages"""
     if not applications_db:
-        return {
-            "stages": [],
-            "total": 0
-        }
+        return {"stages": [], "total": 0}
     
     total = len(applications_db)
     
-    # Count each stage
-    applied = total  # All applications start as applied
-    phone_screen = sum(1 for app in applications_db 
-                      if app['status'] in ['phone_screen', 'interview', 'offer'])
-    interview = sum(1 for app in applications_db 
-                   if app['status'] in ['interview', 'offer'])
+    # Count each status independently (not cumulatively)
+    applied = sum(1 for app in applications_db if app['status'] == 'applied')
+    phone_screen = sum(1 for app in applications_db if app['status'] == 'phone_screen')
+    interview = sum(1 for app in applications_db if app['status'] == 'interview')
     offer = sum(1 for app in applications_db if app['status'] == 'offer')
+    rejected = sum(1 for app in applications_db if app['status'] == 'rejected')
     
     stages = [
         {
-            "stage": "Applied",
-            "count": applied,
-            "percentage": 100.0
+            "stage": "Applied", 
+            "count": applied, 
+            "percentage": round((applied / total * 100) if total > 0 else 0, 2)
         },
         {
-            "stage": "Phone Screen",
-            "count": phone_screen,
+            "stage": "Phone Screen", 
+            "count": phone_screen, 
             "percentage": round((phone_screen / total * 100) if total > 0 else 0, 2)
         },
         {
-            "stage": "Interview",
-            "count": interview,
+            "stage": "Interview", 
+            "count": interview, 
             "percentage": round((interview / total * 100) if total > 0 else 0, 2)
         },
         {
-            "stage": "Offer",
-            "count": offer,
+            "stage": "Offer", 
+            "count": offer, 
             "percentage": round((offer / total * 100) if total > 0 else 0, 2)
+        },
+        {
+            "stage": "Rejected", 
+            "count": rejected, 
+            "percentage": round((rejected / total * 100) if total > 0 else 0, 2)
         }
     ]
     
-    return {
-        "stages": stages,
-        "total": total
-    }
+    return {"stages": stages, "total": total}
 
 @app.get("/analytics/sources")
 def get_source_analytics():

@@ -272,18 +272,40 @@ def get_funnel_data():
         return {"stages": [], "total": 0}
     
     total = len(applications_db)
-    applied = total
-    phone_screen = sum(1 for app in applications_db 
-                      if app['status'] in ['phone_screen', 'interview', 'offer'])
-    interview = sum(1 for app in applications_db 
-                   if app['status'] in ['interview', 'offer'])
+    
+    # Count each status independently (not cumulatively)
+    applied = sum(1 for app in applications_db if app['status'] == 'applied')
+    phone_screen = sum(1 for app in applications_db if app['status'] == 'phone_screen')
+    interview = sum(1 for app in applications_db if app['status'] == 'interview')
     offer = sum(1 for app in applications_db if app['status'] == 'offer')
+    rejected = sum(1 for app in applications_db if app['status'] == 'rejected')
     
     stages = [
-        {"stage": "Applied", "count": applied, "percentage": 100.0},
-        {"stage": "Phone Screen", "count": phone_screen, "percentage": round((phone_screen / total * 100) if total > 0 else 0, 2)},
-        {"stage": "Interview", "count": interview, "percentage": round((interview / total * 100) if total > 0 else 0, 2)},
-        {"stage": "Offer", "count": offer, "percentage": round((offer / total * 100) if total > 0 else 0, 2)}
+        {
+            "stage": "Applied", 
+            "count": applied, 
+            "percentage": round((applied / total * 100) if total > 0 else 0, 2)
+        },
+        {
+            "stage": "Phone Screen", 
+            "count": phone_screen, 
+            "percentage": round((phone_screen / total * 100) if total > 0 else 0, 2)
+        },
+        {
+            "stage": "Interview", 
+            "count": interview, 
+            "percentage": round((interview / total * 100) if total > 0 else 0, 2)
+        },
+        {
+            "stage": "Offer", 
+            "count": offer, 
+            "percentage": round((offer / total * 100) if total > 0 else 0, 2)
+        },
+        {
+            "stage": "Rejected", 
+            "count": rejected, 
+            "percentage": round((rejected / total * 100) if total > 0 else 0, 2)
+        }
     ]
     
     return {"stages": stages, "total": total}
